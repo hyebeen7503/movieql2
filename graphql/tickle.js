@@ -45,8 +45,9 @@ export const searchStockInKo = (_keyword, _stockLists) =>
 
 export const searchStockInEng = (_keyword, _stockLists) => 
 {
+  console.log(_keyword);
   const searchStockInEngResults = _stockLists.filter (
-    _stockLists => _stockLists.nameEng.toLowerCase().includes(_keyword.toLowerCase()) || 
+    _stockLists => _stockLists.nameEn.toLowerCase().includes(_keyword.toLowerCase()) || 
     _stockLists.symbol.toLowerCase().includes(_keyword.toLowerCase())
     );
   return searchStockInEngResults;
@@ -92,3 +93,35 @@ export const refineKeyword = (_keyword) => {
     };
     return produceObj;
   }
+
+  //ETF전체검색할때, sector별로 구분해서 새로운 리스트 생성
+export const etfGroupBySector = (_sector,_stockLists) => {
+  let produceObj = [];
+
+  switch (_sector) {
+    case "index": {
+      _stockLists.forEach((stock)=> {if(stock.sector == "index"){produceObj.push(stock);}});
+      break;
+    }
+    case "futures": {
+      _stockLists.forEach((stock)=> {if(stock.sector == "futures"){produceObj.push(stock);}});
+      break;
+    }
+    case "personality": {
+      _stockLists.forEach((stock)=> {if(stock.sector == "personality"){produceObj.push(stock);}});
+      break;
+    }
+    case "theme": {
+      _stockLists.forEach((stock)=> {if(stock.sector == "theme"){produceObj.push(stock);}});
+      break;
+    }
+    case "ALL":{
+      _stockLists.forEach((stock)=> {if(stock.sector == "index" || "futures" || "personality" || "theme"){produceObj.push(stock);}});
+      break;
+    }
+      default: {
+      break;
+    }
+  };
+  return produceObj;
+}

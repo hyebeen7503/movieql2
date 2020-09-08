@@ -8,6 +8,12 @@ type Query{
         stockType: StockType
         # stockLists: Sting
     ): [Stock]
+    foreignETFSearch(
+        keyword: String
+        sector: String
+        stockType: StockType
+        # stockLists: Sting
+    ): [Stock]
 }
 
 enum StockType{
@@ -18,7 +24,7 @@ enum StockType{
 
 type Stock{
     nameKo: String!
-    nameEng: String!
+    nameEn: String!
     symbol: String!
     sector: String!
     stockType: StockType
