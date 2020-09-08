@@ -4,21 +4,24 @@ type Query{
     
     foreignInvestSearch(
         keyword: String
-        sector: String
+        # sector: String
+        stockType: StockType
         # stockLists: Sting
     ): [Stock]
 }
 
-# enum StockType{
-#   STOCK_US
-#   ETF_US
-# }
+enum StockType{
+  ALL
+  STOCK_US
+  ETF_US
+}
 
 type Stock{
     nameKo: String!
     nameEng: String!
     symbol: String!
     sector: String!
+    stockType: StockType
 }
 
 # type foreignInvestSearchResult {

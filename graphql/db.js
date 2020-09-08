@@ -1,6 +1,6 @@
-import * as Hangul from 'hangul-js';
+import {getInvestProductList, searchStockByKeyword} from "./tickle";
 
-export const stockLists = [
+export const stockListsDB = [
   {
     nameKo: "애플",
     nameEng: "Apple",
@@ -20,7 +20,7 @@ export const stockLists = [
     nameEng: "Tesla",
     symbol: "TSLA",
     sector: "personality",
-    stockType: "ETF_US"
+    stockType: "STOCK_US"
     
   },
   {
@@ -35,14 +35,14 @@ export const stockLists = [
     nameEng: "Facebook",
     symbol: "FB",
     sector: "futures",
-    stockType:"ETF_US"
+    stockType:"STOCK_US"
   },
   {
     nameKo: "디즈니",
     nameEng: "Disney",
     symbol: "DIS",
     sector: "personality",
-    stockType: "ETF_US"
+    stockType: "STOCK_US"
   },
   {
     nameKo: "넷플릭스",
@@ -56,14 +56,14 @@ export const stockLists = [
     nameEng: "Google",
     symbol: "GOOGL",
     sector: "personality",
-    stockType: "ETF_US"
+    stockType: "STOCK_US"
   },
   {
     nameKo: "스타벅스",
     nameEng: "Starbucks",
     symbol: "SBUX",
     sector: "futures",
-    stockType: "ETF_US"
+    stockType: "STOCK_US"
   },
   {
     nameKo: "코카콜라",
@@ -77,21 +77,21 @@ export const stockLists = [
     nameEng: "Tiffany & Co.",
     symbol: "TIF",
     sector: "personality",
-    stockType: "ETF_US"
+    stockType: "STOCK_US"
   },
   {
     nameKo: "켈로그",
     nameEng: "Kellogg's",
     symbol: "K",
     sector: "personality",
-    stockType: "ETF_US"
+    stockType: "STOCK_US"
   },
   {
     nameKo: "시티그룹",
     nameEng: "Citigroup",
     symbol: "C",
     sector: "index",
-    stockType: "ETF_US"
+    stockType: "STOCK_US"
   },
   {
     nameKo: "델타항공",
@@ -105,14 +105,14 @@ export const stockLists = [
     nameEng: "Ford",
     symbol: "F",
     sector: "futures",
-    stockType: "ETF_US"
+    stockType: "STOCK_US"
   },
   {
     nameKo: "엔비디아",
     nameEng: "NVIDIA",
     symbol: "NVDA",
     sector: "theme",
-    stockType: "ETF_US"
+    stockType: "STOCK_US"
   },
   {
     nameKo: "에이엠디",
@@ -133,16 +133,84 @@ export const stockLists = [
     nameEng: "Walmart",
     symbol: "WMT",
     sector: "theme",
-    stockType: "ETF_US"
+    stockType: "STOCK_US"
   },
   {
     nameKo: "쓰리엠",
     nameEng: "3M",
     symbol: "MMM",
     sector: "theme",
-    stockType: "ETF_US"
+    stockType: "STOCK_US"
+  },
+  {
+    nameEn: "Global X Social Media ETF",
+    nameKo: "SNS",
+    symbol: "SOCL",
+    sector: "theme",
+    stockType: "ETF-US"
+  },
+  {
+    nameEn: "Global X FinTech ETF",
+    nameKo: "핀테크",
+    symbol: "FINX",
+    sector: "theme",
+    stockType: "ETF-US"
+  },
+  {
+    nameEn: "iShares Core Conservative Allocation ETF",
+    nameKo: "안정 추구형",
+    symbol: "AOK",
+    sector: "tendency",
+    stockType: "ETF-US"
+  },
+  {
+    nameEn: "iShares Core Growth Allocation ETF",
+    nameKo: "적극 투자형",
+    symbol: "AOR",
+    sector: "tendency",
+    stockType: "ETF-US"
+  },
+  {
+    nameEn: "iShares Gold Trust",
+    nameKo: "금",
+    symbol: "IAU",
+    sector: "futures",
+    stockType: "ETF-US"
+  },
+  {
+    nameEn: "Invesco DB U.S. Dollar Index Bullish Fund",
+    nameKo: "달러",
+    symbol: "UUP",
+    sector: "futures",
+    stockType: "ETF-US",
+  },
+  {
+    nameEn: "SPDR S&P 500 ETF Trust",
+    nameKo: "S&P 500",
+    symbol: "SPY",
+    sector: "index",
+    stockType: "ETF-US",
+  },
+  {
+    nameEn: "Invesco QQQ Trust",
+    nameKo: "NASDAQ 100",
+    symbol: "QQQ",
+    sector: "index",
+    stockType: "ETF-US",
   }
 ];
+
+export const test = (_keyword, _stockType) => {
+  //const { keyword, stockType } = event.arguments;
+  const stockLists = getInvestProductList(_stockType, stockListsDB);
+  const searchResults = searchStockByKeyword(
+    _keyword === "" ? "ALL" : _keyword,
+    stockLists
+  );
+  return searchResults;
+}
+
+
 
 //ETF전체검색할때, sector별로 구분해서 새로운 리스트 생성
 export const etfGroupBySector = (_sector,_stockLists) => {
@@ -175,87 +243,3 @@ export const etfGroupBySector = (_sector,_stockLists) => {
   };
   return produceObj;
 }
-
-export const searchStockByKeyword = (_keyword, _stockLists) => {
-    const languageToFind = refineKeyword(_keyword);
-    switch (languageToFind) {
-      case "ko": {
-        return searchStockInKo(_keyword, _stockLists);
-      }
-      case "eng": {
-        console.log("영어로 인식");
-        return searchStockInEng(_keyword, _stockLists);
-      }
-      case "all": {
-        console.log("all로 인식");
-        return _stockLists;
-      }
-      default: {
-        return [];
-      }
-  };
-}
-
-export const searchStockInKo = (_keyword, _stockLists) => 
-{
-  const searchStockInKoResults = [];
-
-  //초성검색_stockLists에 초성필드 추가
-  _stockLists.forEach((stock) => {
-    const disassemble = Hangul.disassemble(stock.nameKo, true);
-    const initial = disassemble.reduce((prev, elem) => {
-      elem = elem[0] ? elem[0] : elem;
-      return prev + elem;
-    }, "");
-    stock.disassembled = initial;
-  });
-
-//문자검색 || 초성검색
-  for(let stock of _stockLists){
-    if(Hangul.search(stock.nameKo,_keyword) >= 0 || stock.disassembled.includes(_keyword) == 1 ){
-      searchStockInKoResults.push(stock);
-    }
-  }
-  return searchStockInKoResults;
-}
-
-//초성검색 안하려면 이거
-// export const searchStockInKo = (_keyword, _stockLists) => 
-// {
-//   var searchStockInKoResults = [];
-//   for(let stock of _stockLists){
-//     if(Hangul.search(stock.nameKo,_keyword) >= 0){
-//       searchStockInKoResults.push(stock);
-//     }
-//   }
-//   return searchStockInKoResults;
-// }
-
-
-
-export const searchStockInEng = (_keyword, _stockLists) => 
-{
-  const searchStockInEngResults = _stockLists.filter (
-    _stockLists => _stockLists.nameEng.toLowerCase().includes(_keyword.toLowerCase()) || 
-    _stockLists.symbol.toLowerCase().includes(_keyword.toLowerCase())
-    );
-  return searchStockInEngResults;
-} 
-
-export const refineKeyword = (_keyword) => {
-      const checkKo = /^[ㄱ-ㅎ|ㅏ-ㅣ|가-힣 ]*$/;  //한글체크                                                                                                                                                   
-      const checkEng = /^[a-zA-Z&-. 0-9]*$/;   //영어, 특수문자, 숫자 체크
-      // const checkNull = /^\s+|\s+$/g;
-      if (_keyword.match(checkKo)){ 
-        return "ko";
-      }
-      if(_keyword.match(checkEng)){
-        if(_keyword == "ALL")
-        return "all"
-      else return "eng";
-      }
-      else {
-        return "오류..?";
-      }
-  };
-
