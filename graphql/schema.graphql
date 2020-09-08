@@ -1,0 +1,37 @@
+type Query{
+    people: [Person]!
+    person(
+        id: Int!
+        ): Person
+    # keyward: String! 
+    # stockLists: [Stock]
+    
+    foreignInvestSearch(
+        keyword: String
+        sector: String
+        # stockLists: Sting
+    ): [Stock]
+}
+
+# enum StockType{
+#   STOCK_US
+#   ETF_US
+# }
+
+type Stock{
+    nameKo: String!
+    nameEng: String!
+    symbol: String!
+    sector: String!
+}
+
+# type foreignInvestSearchResult {
+#   items: [Stock]
+# }
+
+type Person{
+    id: Int!
+    name: String!
+    age: Int!
+    gender: String!
+}
