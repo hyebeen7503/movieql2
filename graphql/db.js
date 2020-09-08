@@ -276,7 +276,7 @@ export const refineKeyword = (_keyword) => {
         return "ko";
       }
       if(_keyword.match(checkEng)){
-        if(_keyword == "all")
+        if(_keyword === "ALL")
         return "all"
       else return "eng";
       }
