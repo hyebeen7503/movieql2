@@ -1,8 +1,4 @@
 type Query{
-    people: [Person]!
-    person(
-        id: Int!
-        ): Person
     # keyward: String! 
     # stockLists: [Stock]
     
@@ -28,10 +24,3 @@ type Stock{
 # type foreignInvestSearchResult {
 #   items: [Stock]
 # }
-
-type Person{
-    id: Int!
-    name: String!
-    age: Int!
-    gender: String!
-}

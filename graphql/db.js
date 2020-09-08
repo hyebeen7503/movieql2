@@ -1,31 +1,5 @@
 import * as Hangul from 'hangul-js';
 
-export const people = [
-    {
-      id: "0",
-      name: "Nicolas",
-      age: 18,
-      gender: "female"
-    },
-    {
-      id: "1",
-      name: "Jisu",
-      age: 18,
-      gender: "female"
-    },
-    {
-      id: "2",
-      name: "Japan Guy",
-      age: 18,
-      gender: "male"
-    }
-  ];
-
-  export const getById = id  => {
-      const filteredPeople = people.filter(person => person.id === String(id));
-      return filteredPeople[0];
-  }
-
 export const stockLists = [
   {
     nameKo: "애플",
@@ -276,7 +250,7 @@ export const refineKeyword = (_keyword) => {
         return "ko";
       }
       if(_keyword.match(checkEng)){
-        if(_keyword == "all")
+        if(_keyword == "ALL")
         return "all"
       else return "eng";
       }

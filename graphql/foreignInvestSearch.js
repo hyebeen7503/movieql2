@@ -5,62 +5,72 @@ import {
   querySkIndex,
 } from "../../../../../libs/dynamodb";
 import { mergeItems } from "../helper";
-import { searchStockByKeyword, getInvestProductList } from "../libs/Search";
-import { ErrorHandler } from "../../../../../libs/errorHandler";
-import { count } from "console";
+import {
+  searchStockByKeyword,
+  getInvestProductList,
+} from "./foreignStockSearchHelper";
 
 export default async (event) => {
   try {
     // 그래프큐엘로 들어온 변수 저장
-    const { keyword = "all", searchProduct = "all" } = event;
-    return await dummySearchResult(keyword, searchProduct);
+    const { keyword, stockType } = event.arguments;
+    const results = await dummySearchResult(
+      keyword === "" ? "ALL" : keyword,
+      stockType
+    );
+    return { items: results };
     //현재 환율 받아오기
     const usdString = "exchangeRate";
     const currentUsd = (await queryEqual(usdString, `${usdString}-USD`))[0];
 
     // DynamoDB 에서 SK 로 쿼리하여 주식 정보 리스트 받아오기
-    const stockLists = await getInvestProductList(searchProduct);
+    const stockLists = await getInvestProductList(stockType);
 
     // 검색어와 주식정보 리스트를 받아서, 검색 결과 주식 리스트 받기
-    const searchResults = searchStockByKeyword(keyword, stockLists);
+    const searchResults = searchStockByKeyword(
+      keyword === "" ? "ALL" : keyword,
+      stockLists
+    );
 
     const finalFoundArray = mergeItems(searchResults, currentUsd.rate);
     return finalFoundArray;
   } catch (err) {
-    console.log("errr", err);
-    return ErrorResponse(err, "foreignStockChart");
+    return ErrorResponse(err, "foreignStockSearch");
   }
 };
 
-const dummySearchResult = async (_keyword, _searchProduct) => {
-  await Promise.delay(Math.random() * 1000); // 쿼리 돈다 치고 최대 1초간의 지연
+const dummySearchResult = async (_keyword, _stockType) => {
+  await Promise.delay(Math.random() * 1500); // 쿼리 돈다 치고 최대 1.5초간의 지연
   let dummyResultArray = [];
-  switch (_searchProduct) {
-    case "ETF-US": {
+  switch (_stockType) {
+    case "ETF_US": {
       let stocks = ETF_DUMMYS;
-      if (_keyword !== "all") {
+      if (_keyword !== "ALL") {
         const count = Math.floor(Math.random() * stocks.length);
         stocks = stocks.slice(0, count);
       }
-      stocks = stocks.map((stock) => Object.assign(randomAdderObj(), stock));
+      stocks = stocks.map((stock) =>
+        Object.assign({}, randomAdderObj(), stock, { stockType: "ETF_US" })
+      );
       dummyResultArray = stocks;
       break;
     }
-    case "stock-US": {
+    case "STOCK_US": {
       let stocks = await querySkIndex("stockDetail");
 
-      if (_keyword !== "all") {
+      if (_keyword !== "ALL") {
         const count = Math.floor(Math.random() * stocks.length);
+
         stocks = stocks.slice(0, count);
       }
       dummyResultArray = stocks.map((stock) =>
-        Object.assign(randomAdderObj(), stock, { stockType: "stock-US" })
+        Object.assign({}, randomAdderObj(), stock, { stockType: "STOCK_US" })
       );
       break;
     }
-    case "all": {
+    case "ALL": {
       let etfs = await dummySearchResult(_keyword, "ETF-US");
-      let stocks = await dummySearchResult(_keyword, "stock-US");
+      let stocks = await dummySearchResult(_keyword, "STOCK_US");
       dummyResultArray = stocks.concat(etfs);
       break;
     }
@@ -77,7 +87,6 @@ const randomAdderObj = () => {
     fluctuationRate: (Math.random() * 30 - Math.random() * 15).toFixed(2),
     lastTradeVolume: (Math.random() * 1000000).toFixed(2),
     lastPrice: (Math.random() * 50000).toFixed(2),
-    lastTradeVolume: Math.floor(Math.random() * 100000),
   };
 };
 
@@ -187,5 +196,4 @@ let ETF_DUMMYS = [
       "https://tickle-foreignstock.s3.ap-northeast-2.amazonaws.com/microsoftsb.png",
   },
 ];
-
 
